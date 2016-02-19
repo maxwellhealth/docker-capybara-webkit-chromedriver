@@ -26,8 +26,26 @@ RUN curl -sS -o - https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-ke
     apt-get -yqq install google-chrome-stable && \
     rm -rf /var/lib/apt/lists/*
 
+# Disable the SUID sandbox so that Chrome can launch without being in a privileged container.
+# One unfortunate side effect is that `google-chrome --help` will no longer work.
+RUN dpkg-divert --add --rename --divert /opt/google/chrome/google-chrome.real /opt/google/chrome/google-chrome && \
+    echo "#!/bin/bash\nexec /opt/google/chrome/google-chrome.real --disable-setuid-sandbox \"\$@\"" > /opt/google/chrome/google-chrome && \
+    chmod 755 /opt/google/chrome/google-chrome
+
+# Default configuration
+ENV DISPLAY :20.0
+ENV SCREEN_GEOMETRY "1440x900x24"
+ENV CHROMEDRIVER_PORT 4444
+ENV CHROMEDRIVER_WHITELISTED_IPS "127.0.0.1"
+
 # Set working directory to canonical directory
 WORKDIR /usr/src/app
 
-CMD ["bundle", "exec", "cucumber"]
+# Adds ability to run xvfb in daemonized mode
+ADD xvfb_init /etc/init.d/xvfb
+RUN chmod a+x /etc/init.d/xvfb
+ADD xvfb-daemon-run /usr/bin/xvfb-daemon-run
+RUN chmod a+x /usr/bin/xvfb-daemon-run
+
+ENTRYPOINT ["/usr/bin/xvfb-daemon-run"]
 
