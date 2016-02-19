@@ -27,3 +27,7 @@ docker run --rm my-capybara-app
 With some tlc, it may be possible to use this image out of the box
 (without a dependent Dockerfile).
 
+*Where Credit is Due*
+- @robcherry for [docker-chromedriver](https://github.com/RobCherry/docker-chromedriver)
+- @keyvanfatehi for [keyvanfatehi//chrome-xvfb](https://github.com/kfatehi/docker-chrome-xvfb)
+
