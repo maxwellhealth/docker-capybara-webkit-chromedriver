@@ -7,22 +7,23 @@ Create a new Dockerfile in the root of your Capybara-Cucumber test
 suite. It should look like this:
 
 ```Dockerfile
-FROM maxwellhealthofficial/capybara-webkit-chromedriver
+FROM maxwellhealthofficial/docker-capybara-webkit-chromedriver
 
 ADD Gemfile /usr/src/app/Gemfile
 RUN bundle install
-ADD features /usr/src/app/features
+ADD . /usr/src/app/
 
-CMD ["bundle", "exec", "cucumber"]
+CMD ["bundle exec cucumber"]
 ```
 
-With some tlc, it will be possible to use this image out of the box (if
-it isn't already possible).
-
-To use the container, run the following from the root of your
-Capybara-Cucumber test suite:
+To use the image, build your Dockerfile in the repo where your capybara
+suite lives and run it.
 
 ```console
 docker build -t my-capybara-app .
-docker run -it --rm my-capybara-app
+docker run --rm my-capybara-app
 ```
+
+With some tlc, it may be possible to use this image out of the box
+(without a dependent Dockerfile).
+
