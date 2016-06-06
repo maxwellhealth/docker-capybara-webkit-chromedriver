@@ -1,4 +1,4 @@
-FROM ruby:2.2
+FROM ruby:2.2.1
 MAINTAINER Maxwell Health
 
 ENV DEBIAN_FRONTEND noninteractive
