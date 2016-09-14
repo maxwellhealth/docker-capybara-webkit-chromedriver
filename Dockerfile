@@ -1,4 +1,4 @@
-FROM ruby:2.2.1
+FROM ruby:2.2.2
 MAINTAINER Maxwell Health
 
 ENV DEBIAN_FRONTEND noninteractive
@@ -40,6 +40,32 @@ ENV CHROMEDRIVER_WHITELISTED_IPS "127.0.0.1"
 
 # Set working directory to canonical directory
 WORKDIR /usr/src/app
+
+# Update bundler
+RUN gem install bundler --version 1.11.2
+RUN bundle config --global silence_root_warning 1
+
+# Install gems to run cucumber-capybara using chromedriver
+# Teams have run into issues overtime regarding cucumber running with an updated gem version
+# Therefore, installing specific versions will help limit dependency issues
+RUN gem install capybara --version 2.7.1
+RUN gem install capybara-webkit --version 1.11.1
+RUN gem install chromedriver-helper --version 1.0.0
+RUN gem install cucumber --version 2.3.3
+RUN gem install selenium-webdriver --version 2.53.0
+
+# Reinstall chromedriver v2.21 as installing one of the above gems updates the chromedriver to the latest version
+# Using v2.24(latest as of 9/15/16), would cause a Chrome failure to start with an error of 'crashed'
+# TODO test moving initial installation of chromedriver after installation of gems
+RUN rm -rf /opt/chromedriver-2.21/chromedriver
+RUN CHROMEDRIVER_VERSION='2.21' && \
+    mkdir -p /opt/chromedriver-$CHROMEDRIVER_VERSION && \
+    curl -sS -o /tmp/chromedriver_linux64.zip http://chromedriver.storage.googleapis.com/$CHROMEDRIVER_VERSION/chromedriver_linux64.zip && \
+    unzip -qq /tmp/chromedriver_linux64.zip -d /opt/chromedriver-$CHROMEDRIVER_VERSION && \
+    rm /tmp/chromedriver_linux64.zip && \
+    chmod +x /opt/chromedriver-$CHROMEDRIVER_VERSION/chromedriver && \
+    ln -fs /opt/chromedriver-$CHROMEDRIVER_VERSION/chromedriver /usr/local/bundle/bin/chromedriver
+
 
 # Adds ability to run xvfb in daemonized mode
 ADD xvfb_init /etc/init.d/xvfb
